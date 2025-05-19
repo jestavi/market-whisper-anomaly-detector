@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Command,
@@ -24,7 +24,18 @@ interface StockSelectorProps {
 
 export function StockSelector({ value, onChange }: StockSelectorProps) {
   const [open, setOpen] = useState(false);
-  const stocks = getAvailableStockSymbols();
+  const [stocks, setStocks] = useState<string[]>([]);
+  
+  // Fetch stock symbols safely
+  useEffect(() => {
+    try {
+      const availableStocks = getAvailableStockSymbols();
+      setStocks(availableStocks || []);
+    } catch (error) {
+      console.error("Error loading stock symbols:", error);
+      setStocks([]);
+    }
+  }, []);
 
   return (
     <div className="flex items-center space-x-4">
@@ -46,24 +57,30 @@ export function StockSelector({ value, onChange }: StockSelectorProps) {
             <CommandInput placeholder="Search stocks..." />
             <CommandEmpty>No stock found.</CommandEmpty>
             <CommandGroup>
-              {stocks.map((stock) => (
-                <CommandItem
-                  key={stock}
-                  value={stock}
-                  onSelect={() => {
-                    onChange(stock);
-                    setOpen(false);
-                  }}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value === stock ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {stock}
+              {Array.isArray(stocks) && stocks.length > 0 ? (
+                stocks.map((stock) => (
+                  <CommandItem
+                    key={stock}
+                    value={stock}
+                    onSelect={() => {
+                      onChange(stock);
+                      setOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        value === stock ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {stock}
+                  </CommandItem>
+                ))
+              ) : (
+                <CommandItem value="loading" disabled>
+                  Loading stocks...
                 </CommandItem>
-              ))}
+              )}
             </CommandGroup>
           </Command>
         </PopoverContent>
