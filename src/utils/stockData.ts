@@ -17,12 +17,15 @@ export const fetchStockData = async (symbol: string, from: Date, to: Date): Prom
   const days = Math.ceil((to.getTime() - from.getTime()) / (1000 * 3600 * 24));
   const startPrice = 100 + Math.random() * 900; // Random start price between 100 and 1000
   
+  // Ensure we generate at least one data point, even for very short time ranges
+  const minDays = Math.max(1, days);
+  
   let currentDate = new Date(from);
   let price = startPrice;
   
-  for (let i = 0; i < days; i++) {
-    // Skip weekends
-    if (currentDate.getDay() === 0 || currentDate.getDay() === 6) {
+  for (let i = 0; i < minDays; i++) {
+    // Skip weekends (but ensure at least one data point for very short ranges)
+    if ((currentDate.getDay() === 0 || currentDate.getDay() === 6) && minDays > 2) {
       currentDate = new Date(currentDate.getTime() + 24 * 60 * 60 * 1000);
       continue;
     }
@@ -76,38 +79,52 @@ export const fetchStockData = async (symbol: string, from: Date, to: Date): Prom
 };
 
 export const fetchStockMetrics = async (symbol: string, data: StockData[]): Promise<StockMetrics> => {
-  if (data.length === 0) {
-    throw new Error('No stock data available to calculate metrics');
+  if (!data || data.length === 0) {
+    // Return default metrics if no data available
+    return {
+      symbol,
+      currentPrice: 0,
+      dailyChange: 0,
+      dailyChangePercent: 0,
+      averageVolume: 0,
+      anomalyCount: 0,
+      volatility: 0,
+      rsi: 50
+    };
   }
   
   // Get latest price
   const latest = data[data.length - 1];
-  const previousDay = data[data.length - 2] || data[0];
+  const previousDay = data.length > 1 ? data[data.length - 2] : data[0];
   
   // Calculate daily change
   const dailyChange = latest.close - previousDay.close;
   const dailyChangePercent = (dailyChange / previousDay.close) * 100;
   
-  // Calculate average volume (20-day)
-  const recentData = data.slice(-20);
+  // Calculate average volume (20-day or as many days as available)
+  const recentData = data.slice(-Math.min(20, data.length));
   const averageVolume = recentData.reduce((sum, day) => sum + day.volume, 0) / recentData.length;
   
-  // Calculate volatility (20-day standard deviation of returns)
+  // Calculate volatility (standard deviation of returns, using as many days as available)
   const returns = [];
   for (let i = 1; i < recentData.length; i++) {
     const dailyReturn = (recentData[i].close - recentData[i-1].close) / recentData[i-1].close;
     returns.push(dailyReturn);
   }
-  const meanReturn = returns.reduce((sum, ret) => sum + ret, 0) / returns.length;
-  const squaredDiffs = returns.map(ret => Math.pow(ret - meanReturn, 2));
-  const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / squaredDiffs.length;
-  const volatility = Math.sqrt(variance) * Math.sqrt(252) * 100; // Annualized volatility in percentage
   
-  // Calculate RSI (14-day)
-  const rsi = calculateRSI(data.slice(-15));
+  let volatility = 0;
+  if (returns.length > 0) {
+    const meanReturn = returns.reduce((sum, ret) => sum + ret, 0) / returns.length;
+    const squaredDiffs = returns.map(ret => Math.pow(ret - meanReturn, 2));
+    const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / squaredDiffs.length || 0;
+    volatility = Math.sqrt(variance) * Math.sqrt(252) * 100; // Annualized volatility in percentage
+  }
+  
+  // Calculate RSI (14-day or as many days as available)
+  const rsi = calculateRSI(data.slice(-Math.min(15, data.length)));
   
   // Dummy anomaly count for demonstration
-  const anomalyCount = Math.floor(Math.random() * 5);
+  const anomalyCount = Math.max(0, Math.floor(Math.random() * (data.length > 5 ? 5 : data.length)));
   
   return {
     symbol,
@@ -123,7 +140,7 @@ export const fetchStockMetrics = async (symbol: string, data: StockData[]): Prom
 
 // Calculate Relative Strength Index
 function calculateRSI(data: StockData[]): number {
-  if (data.length < 14) return 50; // Not enough data
+  if (data.length < 2) return 50; // Not enough data
   
   let gains = 0;
   let losses = 0;

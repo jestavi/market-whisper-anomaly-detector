@@ -6,12 +6,60 @@ import { v4 as uuidv4 } from 'uuid';
 // like Isolation Forest. This is a simplified version for demonstration purposes.
 
 export const detectAnomalies = (stockData: StockData[]): AnomalyData[] => {
-  if (!stockData || stockData.length < 20) {
+  if (!stockData || stockData.length < 2) {
     return [];
   }
   
   const anomalies: AnomalyData[] = [];
   
+  // For small datasets (less than 20 points), use a simpler approach
+  if (stockData.length < 20) {
+    // Just detect large day-to-day changes as potential anomalies
+    for (let i = 1; i < stockData.length; i++) {
+      const prevDay = stockData[i-1];
+      const currentDay = stockData[i];
+      
+      // Calculate percentage change
+      const priceChange = (currentDay.close - prevDay.close) / prevDay.close;
+      const volumeChange = currentDay.volume / (prevDay.volume || 1) - 1;
+      
+      // Flag large price movements (more than 5%)
+      if (Math.abs(priceChange) > 0.05) {
+        const severity = Math.abs(priceChange) > 0.1 ? 'high' : 
+                        (Math.abs(priceChange) > 0.075 ? 'medium' : 'low');
+        
+        anomalies.push({
+          id: uuidv4(),
+          date: currentDay.date,
+          value: currentDay.close,
+          score: Math.abs(priceChange) * 100,
+          type: 'price',
+          severity,
+          description: `Price change of ${(priceChange * 100).toFixed(2)}% detected`
+        });
+      }
+      
+      // Flag large volume changes (more than 100%)
+      if (Math.abs(volumeChange) > 1) {
+        const severity = Math.abs(volumeChange) > 2 ? 'high' : 
+                        (Math.abs(volumeChange) > 1.5 ? 'medium' : 'low');
+        
+        anomalies.push({
+          id: uuidv4(),
+          date: currentDay.date,
+          value: currentDay.volume,
+          score: Math.abs(volumeChange) * 50,
+          type: 'volume',
+          severity,
+          description: `Volume change of ${(volumeChange * 100).toFixed(2)}% detected`
+        });
+      }
+    }
+    
+    return anomalies;
+  }
+  
+  // For larger datasets, use the original algorithm
   // Calculate moving averages for detection
   const priceMA20 = calculateMovingAverage(stockData.map(d => d.close), 20);
   const volumeMA20 = calculateMovingAverage(stockData.map(d => d.volume), 20);
@@ -92,4 +140,3 @@ const calculateStandardDeviation = (data: number[], mean: number[]): number => {
   
   return Math.sqrt(sumSquaredDiff / count);
 };
-
