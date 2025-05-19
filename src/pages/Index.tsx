@@ -5,6 +5,8 @@ import { DateRangeSelector } from '@/components/DateRangeSelector';
 import { StockChart } from '@/components/StockChart';
 import { MetricsPanel } from '@/components/MetricsPanel';
 import { AnomalyList } from '@/components/AnomalyList';
+import { ModelExplanation } from '@/components/ModelExplanation';
+import { OnboardingTooltips } from '@/components/OnboardingTooltips';
 import { StockData, AnomalyData, TimeRange, DateRangeValue } from '@/types';
 import { fetchStockData, fetchStockMetrics } from '@/utils/stockData';
 import { detectAnomalies } from '@/utils/anomalyDetection';
@@ -13,6 +15,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 const Index = () => {
   const [selectedStock, setSelectedStock] = useState('AAPL');
@@ -25,6 +33,7 @@ const Index = () => {
   const [metrics, setMetrics] = useState<any>(null);
   const [selectedAnomaly, setSelectedAnomaly] = useState<AnomalyData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>("chart");
   const { toast } = useToast();
 
   // Load data when stock or date range changes
@@ -110,8 +119,18 @@ const Index = () => {
   const handleAnomalyClick = (anomaly: AnomalyData) => {
     setSelectedAnomaly(anomaly);
     
-    // Scroll to the anomaly date in the chart
-    // This would require integration with the chart component
+    // On mobile, switch to the anomaly tab when selecting an anomaly
+    if (window.innerWidth < 768) {
+      setActiveTab("anomalies");
+    }
+    
+    // Scroll to the anomaly details on desktop
+    if (window.innerWidth >= 768) {
+      const anomalyElement = document.getElementById('anomaly-details');
+      if (anomalyElement) {
+        anomalyElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   };
 
   return (
@@ -119,111 +138,200 @@ const Index = () => {
       <header className="bg-card p-4 border-b shadow-sm">
         <div className="container">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold flex items-center">
-              <AlertTriangle className="mr-2 text-primary" />
+            <h1 className="text-xl md:text-2xl font-bold flex items-center">
+              <AlertTriangle className="mr-2 text-primary hidden sm:inline" />
               Stock Market Anomaly Detector
             </h1>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 container py-6 space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <StockSelector value={selectedStock} onChange={setSelectedStock} />
-          <DateRangeSelector 
-            dateRange={dateRange} 
-            onDateRangeChange={setDateRange}
-            onPresetSelected={handleTimeRangePreset}
-          />
-        </div>
-        
-        {loading ? (
-          <div className="h-96 flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
-              <p className="text-muted-foreground">Loading {selectedStock} data...</p>
-            </div>
+      <main className="flex-1 container py-4 md:py-6 space-y-4 md:space-y-6">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <StockSelector value={selectedStock} onChange={setSelectedStock} />
+            <DateRangeSelector 
+              dateRange={dateRange} 
+              onDateRangeChange={setDateRange}
+              onPresetSelected={handleTimeRangePreset}
+            />
           </div>
-        ) : (
-          <>
-            {metrics && (
-              <MetricsPanel metrics={metrics} />
-            )}
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <StockChart 
-                  stockData={stockData} 
-                  anomalies={anomalies}
-                  onAnomalyClick={handleAnomalyClick}
-                />
-              </div>
-              <div>
-                <AnomalyList 
-                  anomalies={anomalies} 
-                  onAnomalyClick={handleAnomalyClick}
-                  selectedAnomalyId={selectedAnomaly?.id}
-                />
+          
+          {loading ? (
+            <div className="h-96 flex items-center justify-center">
+              <div className="text-center space-y-4">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="text-muted-foreground">Loading {selectedStock} data...</p>
               </div>
             </div>
-
-            {selectedAnomaly && (
-              <Card className="border border-primary animate-fade-in">
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <Info className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold text-lg">Anomaly Details</h3>
-                    </div>
-                    <Badge 
-                      variant={
-                        selectedAnomaly.severity === 'high'
-                          ? 'destructive'
-                          : (selectedAnomaly.severity === 'medium' ? 'default' : 'outline')
-                      }
-                    >
-                      {selectedAnomaly.severity.toUpperCase()} SEVERITY
-                    </Badge>
-                  </div>
+          ) : (
+            <>
+              {metrics && (
+                <MetricsPanel metrics={metrics} />
+              )}
+              
+              {/* Mobile Tabs View */}
+              <div className="md:hidden">
+                <Tabs defaultValue="chart" value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="grid grid-cols-2 mb-4">
+                    <TabsTrigger value="chart">Chart</TabsTrigger>
+                    <TabsTrigger value="anomalies">
+                      Anomalies 
+                      {anomalies.length > 0 && (
+                        <Badge variant="outline" className="ml-2">{anomalies.length}</Badge>
+                      )}
+                    </TabsTrigger>
+                  </TabsList>
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                  <TabsContent value="chart" className="mt-0">
+                    <StockChart 
+                      stockData={stockData} 
+                      anomalies={anomalies}
+                      onAnomalyClick={handleAnomalyClick}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="anomalies" className="mt-0">
+                    <div className="space-y-4">
+                      <AnomalyList 
+                        anomalies={anomalies} 
+                        onAnomalyClick={handleAnomalyClick}
+                        selectedAnomalyId={selectedAnomaly?.id}
+                      />
+                      
+                      {selectedAnomaly && (
+                        <Card className="border border-primary animate-fade-in" id="anomaly-details">
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div className="flex items-center gap-2">
+                                <Info className="h-5 w-5 text-primary" />
+                                <h3 className="font-semibold text-lg">Anomaly Details</h3>
+                              </div>
+                              <Badge 
+                                variant={
+                                  selectedAnomaly.severity === 'high'
+                                    ? 'destructive'
+                                    : (selectedAnomaly.severity === 'medium' ? 'default' : 'outline')
+                                }
+                              >
+                                {selectedAnomaly.severity.toUpperCase()} SEVERITY
+                              </Badge>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                              <div>
+                                <p className="text-sm text-muted-foreground">Date</p>
+                                <p className="font-medium">
+                                  {new Date(selectedAnomaly.date).toLocaleDateString('en-US', {
+                                    weekday: 'short',
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric'
+                                  })}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Type</p>
+                                <p className="font-medium capitalize">{selectedAnomaly.type} Anomaly</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Anomaly Score</p>
+                                <p className="font-medium">{selectedAnomaly.score.toFixed(2)}</p>
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-1">Description</p>
+                              <p>{selectedAnomaly.description}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )}
+                      
+                      <ModelExplanation />
+                    </div>
+                  </TabsContent>
+                </Tabs>
+              </div>
+              
+              {/* Desktop Layout */}
+              <div className="hidden md:grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-2">
+                  <StockChart 
+                    stockData={stockData} 
+                    anomalies={anomalies}
+                    onAnomalyClick={handleAnomalyClick}
+                  />
+                </div>
+                <div className="space-y-6">
+                  <AnomalyList 
+                    anomalies={anomalies} 
+                    onAnomalyClick={handleAnomalyClick}
+                    selectedAnomalyId={selectedAnomaly?.id}
+                  />
+                  
+                  <ModelExplanation />
+                </div>
+              </div>
+
+              {selectedAnomaly && (
+                <Card className="border border-primary animate-fade-in md:block" id="anomaly-details">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <Info className="h-5 w-5 text-primary" />
+                        <h3 className="font-semibold text-lg">Anomaly Details</h3>
+                      </div>
+                      <Badge 
+                        variant={
+                          selectedAnomaly.severity === 'high'
+                            ? 'destructive'
+                            : (selectedAnomaly.severity === 'medium' ? 'default' : 'outline')
+                        }
+                      >
+                        {selectedAnomaly.severity.toUpperCase()} SEVERITY
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Date</p>
+                        <p className="font-medium">
+                          {new Date(selectedAnomaly.date).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Type</p>
+                        <p className="font-medium capitalize">{selectedAnomaly.type} Anomaly</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Anomaly Score</p>
+                        <p className="font-medium">{selectedAnomaly.score.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    
                     <div>
-                      <p className="text-sm text-muted-foreground">Date</p>
-                      <p className="font-medium">
-                        {new Date(selectedAnomaly.date).toLocaleDateString('en-US', {
-                          weekday: 'short',
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+                      <p className="text-sm text-muted-foreground mb-1">Description</p>
+                      <p>{selectedAnomaly.description}</p>
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground">
+                      <p>
+                        Note: This is a simulated environment with mock data and simplified anomaly detection.
+                        A production system would use more sophisticated algorithms and real-time data.
                       </p>
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Type</p>
-                      <p className="font-medium capitalize">{selectedAnomaly.type} Anomaly</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Anomaly Score</p>
-                      <p className="font-medium">{selectedAnomaly.score.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Description</p>
-                    <p>{selectedAnomaly.description}</p>
-                  </div>
-                  
-                  <div className="text-xs text-muted-foreground">
-                    <p>
-                      Note: This is a simulated environment with mock data and simplified anomaly detection.
-                      A production system would use more sophisticated algorithms and real-time data.
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
+                  </CardContent>
+                </Card>
+              )}
+            </>
+          )}
+        </div>
       </main>
 
       <footer className="border-t py-4 bg-card">
@@ -234,6 +342,9 @@ const Index = () => {
           </p>
         </div>
       </footer>
+      
+      {/* Onboarding tooltips */}
+      <OnboardingTooltips />
     </div>
   );
 };

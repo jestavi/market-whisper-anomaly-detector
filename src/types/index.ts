@@ -38,3 +38,10 @@ export interface DateRangeValue {
   from: Date;
   to: Date;
 }
+
+export interface ModelInfo {
+  shortDescription: string;
+  methodology: string[];
+  accuracy: string;
+  limitations: string[];
+}
