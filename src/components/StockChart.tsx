@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { 
   LineChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, ReferenceDot, Legend, Bar, BarChart, ComposedChart,
-  CandlestickChart, Candlestick
+  ScatterChart, Scatter
 } from 'recharts';
 import { Info } from 'lucide-react';
 import {
@@ -35,6 +35,10 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
     close: item.close,
     high: item.high,
     low: item.low,
+    // Add coordinates for candle chart replacement
+    highToLow: [item.low, item.high],
+    openToClose: [Math.min(item.open, item.close), Math.max(item.open, item.close)],
+    isIncreasing: item.close >= item.open
   }));
 
   const formatDate = (dateString: string) => {
@@ -90,7 +94,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
       case 'candle':
         return (
           <ResponsiveContainer width="100%" height="100%">
-            <CandlestickChart
+            <ComposedChart
               data={chartData}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
@@ -107,12 +111,33 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
-              <Candlestick
-                name="Price"
-                yAccessor={d => [d.open, d.high, d.low, d.close]}
-                fill="hsl(var(--primary))"
-                stroke="hsl(var(--primary))"
-              />
+              
+              {/* High-Low line (represents the full candle range) */}
+              {chartData.map((entry, index) => (
+                <Line
+                  key={`highlow-${index}`}
+                  data={[entry]}
+                  dataKey="highToLow"
+                  stroke={entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+                  strokeWidth={1}
+                  dot={false}
+                  activeDot={false}
+                  isAnimationActive={false}
+                />
+              ))}
+              
+              {/* Open-Close bar (represents the body of the candle) */}
+              {chartData.map((entry, index) => (
+                <Bar
+                  key={`openclose-${index}`}
+                  dataKey="openToClose"
+                  fill={entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+                  stroke={entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
+                  barSize={8}
+                  data={[entry]}
+                  isAnimationActive={false}
+                />
+              ))}
               
               {/* Render anomaly points */}
               {priceAnomalies.map(anomaly => (
@@ -130,7 +155,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
                   onClick={() => onAnomalyClick(anomaly)}
                 />
               ))}
-            </CandlestickChart>
+            </ComposedChart>
           </ResponsiveContainer>
         );
       default: // line chart
