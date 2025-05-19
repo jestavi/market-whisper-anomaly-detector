@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StockData, AnomalyData, ChartType } from '@/types';
@@ -27,6 +26,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
   const [showVolumeChart, setShowVolumeChart] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
+  // Format chart data for rendering
   const chartData = stockData.map(item => ({
     date: item.date,
     price: item.close,
@@ -35,10 +35,19 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
     close: item.close,
     high: item.high,
     low: item.low,
-    // Add coordinates for candle chart replacement
-    highToLow: [item.low, item.high],
-    openToClose: [Math.min(item.open, item.close), Math.max(item.open, item.close)],
+    // These values are used for the custom candlestick visualization
+    highLow: [item.low, item.high],
+    openClose: [Math.min(item.open, item.close), Math.max(item.open, item.close)],
     isIncreasing: item.close >= item.open
+  }));
+
+  // This data is specifically formatted for our custom candlestick rendering
+  const candleData = chartData.map((item, index) => ({
+    index: index,
+    date: item.date,
+    highLow: item.highLow,
+    openClose: item.openClose,
+    isIncreasing: item.isIncreasing
   }));
 
   const formatDate = (dateString: string) => {
@@ -112,32 +121,50 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
               <Tooltip content={<CustomTooltip />} />
               <Legend />
               
-              {/* High-Low line (represents the full candle range) */}
+              {/* Render the candlestick chart using individual components for each candle */}
               {chartData.map((entry, index) => (
                 <Line
                   key={`highlow-${index}`}
-                  data={[entry]}
-                  dataKey="highToLow"
+                  type="monotone"
+                  dataKey="high"
                   stroke={entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
                   strokeWidth={1}
                   dot={false}
                   activeDot={false}
                   isAnimationActive={false}
+                  // This limits the line to just this data point
+                  data={[{high: entry.high, low: entry.low, date: entry.date}]}
+                  // Custom props to make a vertical line
+                  connectNulls={true}
+                  points={[
+                    {x: index, y: entry.low},
+                    {x: index, y: entry.high}
+                  ]}
                 />
               ))}
               
-              {/* Open-Close bar (represents the body of the candle) */}
-              {chartData.map((entry, index) => (
-                <Bar
-                  key={`openclose-${index}`}
-                  dataKey="openToClose"
-                  fill={entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
-                  stroke={entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
-                  barSize={8}
-                  data={[entry]}
-                  isAnimationActive={false}
-                />
-              ))}
+              {/* Render the body of each candle */}
+              <Bar
+                dataKey="openClose"
+                barSize={8}
+                shape={(props) => {
+                  const { x, y, width, height, fill } = props;
+                  const index = props.index as number;
+                  const entry = chartData[index];
+                  const color = entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+                  
+                  return (
+                    <rect
+                      x={x}
+                      y={y}
+                      width={width}
+                      height={height}
+                      fill={color}
+                      stroke={color}
+                    />
+                  );
+                }}
+              />
               
               {/* Render anomaly points */}
               {priceAnomalies.map(anomaly => (
