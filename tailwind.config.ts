@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,19 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                anomaly: {
+                    low: '#3498db',     // blue
+                    medium: '#f39c12',  // orange/amber
+                    high: '#e74c3c',    // red
+                },
+                chart: {
+                    line: '#3498db',    // blue
+                    up: '#2ecc71',      // green
+                    down: '#e74c3c',    // red
+                    grid: '#2c3e50',    // dark blue-gray
+                    tooltip: '#34495e', // dark slate
+                },
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +97,21 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+                'pulse-anomaly': {
+                    '0%, 100%': { opacity: '0.85' },
+                    '50%': { opacity: '1' },
+                },
+                'fade-in': {
+                    '0%': { opacity: '0', transform: 'translateY(10px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+                'pulse-anomaly': 'pulse-anomaly 2s ease-in-out infinite',
+                'fade-in': 'fade-in 0.5s ease-out',
 			}
 		}
 	},
