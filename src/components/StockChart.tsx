@@ -76,20 +76,21 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
   const priceAnomalies = anomalies.filter(a => a.type === 'price');
   const volumeAnomalies = anomalies.filter(a => a.type === 'volume');
 
-  // Custom tooltip content
+  // Custom tooltip content - Fixed to handle undefined values
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length > 0 && payload[0]?.payload) {
+      const data = payload[0].payload;
       return (
         <div className="chart-tooltip">
           <p className="font-medium">{formatDate(label)}</p>
-          <p>Price: {formatPrice(payload[0].value)}</p>
-          <p>Volume: {payload[0].payload.volume.toLocaleString()}</p>
+          <p>Price: {formatPrice(data.price)}</p>
+          <p>Volume: {data.volume ? data.volume.toLocaleString() : 'N/A'}</p>
           {chartType === 'candle' && (
             <>
-              <p>Open: {formatPrice(payload[0].payload.open)}</p>
-              <p>High: {formatPrice(payload[0].payload.high)}</p>
-              <p>Low: {formatPrice(payload[0].payload.low)}</p>
-              <p>Close: {formatPrice(payload[0].payload.close)}</p>
+              <p>Open: {formatPrice(data.open)}</p>
+              <p>High: {formatPrice(data.high)}</p>
+              <p>Low: {formatPrice(data.low)}</p>
+              <p>Close: {formatPrice(data.close)}</p>
             </>
           )}
         </div>
@@ -327,7 +328,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
                     tick={{ fontSize: 10 }}
                     width={50}
                   />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
                   <Legend />
                   <Bar 
                     dataKey="volume" 
