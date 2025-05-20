@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { StockData, AnomalyData, ChartType } from '@/types';
@@ -105,18 +106,25 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 20, right: 20, left: 10, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--secondary))" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={formatDate}
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="hsl(var(--muted-foreground))"
+                tick={{ fontSize: 10 }}
+                minTickGap={10}
+                angle={-45}
+                height={50}
+                textAnchor="end"
               />
               <YAxis 
                 domain={[minPrice, maxPrice]} 
                 tickFormatter={(value) => formatPrice(value).replace('$', '')}
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="hsl(var(--muted-foreground))"
+                tick={{ fontSize: 10 }}
+                width={50}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
@@ -190,18 +198,25 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 20, right: 20, left: 10, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--secondary))" />
               <XAxis 
                 dataKey="date" 
                 tickFormatter={formatDate}
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="hsl(var(--muted-foreground))"
+                tick={{ fontSize: 10 }}
+                minTickGap={10}
+                angle={-45}
+                height={50}
+                textAnchor="end" 
               />
               <YAxis 
                 domain={[minPrice, maxPrice]} 
                 tickFormatter={(value) => formatPrice(value).replace('$', '')}
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="hsl(var(--muted-foreground))"
+                tick={{ fontSize: 10 }}
+                width={50}
               />
               <Tooltip content={<CustomTooltip />} />
               <Legend />
@@ -239,7 +254,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
 
   return (
     <Card className="w-full h-full">
-      <div className="flex flex-wrap justify-between items-center p-4 border-b">
+      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center p-4 border-b gap-3">
         <div className="flex items-center">
           <h3 className="font-semibold text-lg mr-2">Price History</h3>
           <TooltipProvider>
@@ -253,12 +268,13 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
             </UITooltip>
           </TooltipProvider>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+        <div className="flex flex-wrap gap-2 w-full xs:w-auto">
           <div className="flex space-x-2">
             <Button
               variant={chartType === 'line' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setChartType('line')}
+              className="flex-1 xs:flex-auto"
             >
               Line
             </Button>
@@ -266,6 +282,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
               variant={chartType === 'candle' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setChartType('candle')}
+              className="flex-1 xs:flex-auto"
             >
               Candle
             </Button>
@@ -274,6 +291,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
             variant={showVolumeChart ? 'default' : 'outline'}
             size="sm"
             onClick={() => setShowVolumeChart(!showVolumeChart)}
+            className="w-full xs:w-auto"
           >
             {showVolumeChart ? 'Hide Volume' : 'Show Volume'}
           </Button>
@@ -281,26 +299,33 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
       </div>
       <CardContent className="p-0 h-[500px]">
         <div className="h-full flex flex-col">
-          <div className={`${showVolumeChart ? 'h-2/3' : 'h-full'}`}>
+          <div className={`${showVolumeChart ? 'h-2/3' : 'h-full'} w-full`}>
             {renderChart()}
           </div>
           
           {showVolumeChart && (
-            <div className="h-1/3 border-t border-border">
+            <div className="h-1/3 border-t border-border w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={chartData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 5, right: 20, left: 10, bottom: 20 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--secondary))" />
                   <XAxis 
                     dataKey="date" 
                     tickFormatter={formatDate}
-                    stroke="hsl(var(--muted-foreground))" 
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 10 }}
+                    minTickGap={10}
+                    angle={-45}
+                    height={50}
+                    textAnchor="end"
                   />
                   <YAxis 
                     tickFormatter={(value) => `${(value/1000000).toFixed(1)}M`} 
-                    stroke="hsl(var(--muted-foreground))" 
+                    stroke="hsl(var(--muted-foreground))"
+                    tick={{ fontSize: 10 }}
+                    width={50}
                   />
                   <Tooltip />
                   <Legend />

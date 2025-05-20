@@ -137,3 +137,10 @@
     padding-right: 1rem;
   }
 }
+
+/* Extra small screens */
+@screen xs {
+  @media (min-width: 480px) {
+    /* Extra small screen specific styles */
+  }
+}

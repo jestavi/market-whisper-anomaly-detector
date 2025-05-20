@@ -38,7 +38,7 @@ export function StockSelector({ value, onChange }: StockSelectorProps) {
   }, []);
 
   return (
-    <div className="flex items-center space-x-4">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
       <div className="font-medium">Stock Symbol:</div>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
@@ -46,17 +46,17 @@ export function StockSelector({ value, onChange }: StockSelectorProps) {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[140px] justify-between"
+            className="w-full sm:w-[140px] justify-between"
           >
             {value || "Select stock..."}
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[140px] p-0">
+        <PopoverContent className="w-full sm:w-[140px] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search stocks..." />
+            <CommandInput placeholder="Search stocks..." className="h-9" />
             <CommandEmpty>No stock found.</CommandEmpty>
-            <CommandGroup>
+            <CommandGroup className="max-h-[200px] overflow-auto">
               {Array.isArray(stocks) && stocks.length > 0 ? (
                 stocks.map((stock) => (
                   <CommandItem
@@ -66,6 +66,7 @@ export function StockSelector({ value, onChange }: StockSelectorProps) {
                       onChange(stock);
                       setOpen(false);
                     }}
+                    className="cursor-pointer"
                   >
                     <Check
                       className={cn(
