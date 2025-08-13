@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { StockSelector } from '@/components/StockSelector';
 import { DateRangeSelector } from '@/components/DateRangeSelector';
 import { StockChart } from '@/components/StockChart';
@@ -7,6 +8,8 @@ import { MetricsPanel } from '@/components/MetricsPanel';
 import { AnomalyList } from '@/components/AnomalyList';
 import { ModelExplanation } from '@/components/ModelExplanation';
 import { OnboardingTooltips } from '@/components/OnboardingTooltips';
+import { Button } from '@/components/ui/button';
+import { BarChart3, TrendingUp } from 'lucide-react';
 import { StockData, AnomalyData, TimeRange, DateRangeValue } from '@/types';
 import { fetchStockData, fetchStockMetrics } from '@/utils/stockData';
 import { detectAnomalies } from '@/utils/anomalyDetection';
@@ -134,19 +137,43 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-card p-4 border-b shadow-sm">
-        <div className="container">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl md:text-2xl font-bold flex items-center">
-              <AlertTriangle className="mr-2 text-primary hidden sm:inline" />
-              Stock Market Anomaly Detector
-            </h1>
+    <div className="min-h-screen bg-background">
+      {/* Header with Navigation */}
+      <header className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-bold text-foreground">
+                Stock Anomaly Detector
+              </h1>
+            </div>
+            <nav className="flex items-center gap-4">
+              <Button variant="ghost" asChild>
+                <Link to="/">Single Stock</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link to="/portfolio" className="flex items-center gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Portfolio Monitor
+                </Link>
+              </Button>
+            </nav>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 container py-4 md:py-6 space-y-4 md:space-y-6">
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Analyze Individual Stock Anomalies
+          </h2>
+          <p className="text-muted-foreground">
+            Deep dive into a single stock's anomaly patterns and technical indicators
+          </p>
+        </div>
+
         <div className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <StockSelector value={selectedStock} onChange={setSelectedStock} />
@@ -332,19 +359,9 @@ const Index = () => {
             </>
           )}
         </div>
-      </main>
 
-      <footer className="border-t py-4 bg-card">
-        <div className="container text-center text-sm text-muted-foreground">
-          <p>Stock Market Anomaly Detector | Demo Application</p>
-          <p className="text-xs mt-1">
-            This is a demonstration application using simulated data. Not for trading decisions.
-          </p>
-        </div>
-      </footer>
-      
-      {/* Onboarding tooltips */}
-      <OnboardingTooltips />
+        <OnboardingTooltips />
+      </div>
     </div>
   );
 };
