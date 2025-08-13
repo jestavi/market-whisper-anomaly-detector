@@ -130,47 +130,53 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
               <Tooltip content={<CustomTooltip />} />
               <Legend />
               
-              {/* Render the candlestick chart using individual components for each candle */}
-              {chartData.map((entry, index) => (
-                <Line
-                  key={`highlow-${index}`}
-                  type="monotone"
-                  dataKey="high"
-                  stroke={entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))"}
-                  strokeWidth={1}
-                  dot={false}
-                  activeDot={false}
-                  isAnimationActive={false}
-                  // This limits the line to just this data point
-                  data={[{high: entry.high, low: entry.low, date: entry.date}]}
-                  // Custom props to make a vertical line
-                  connectNulls={true}
-                  points={[
-                    {x: index, y: entry.low},
-                    {x: index, y: entry.high}
-                  ]}
-                />
-              ))}
-              
-              {/* Render the body of each candle */}
+              {/* Candlestick using custom shape */}
               <Bar
-                dataKey="openClose"
-                barSize={8}
-                shape={(props) => {
-                  const { x, y, width, height, fill } = props;
-                  const index = props.index as number;
+                dataKey={() => 1}
+                shape={(props: any) => {
+                  const { index } = props;
+                  if (index >= chartData.length) return null;
+                  
                   const entry = chartData[index];
-                  const color = entry.isIncreasing ? "hsl(var(--primary))" : "hsl(var(--destructive))";
+                  const { open, close, high, low } = entry;
+                  
+                  // Calculate positions
+                  const x = props.x + props.width / 2;
+                  const yScale = props.height / (maxPrice - minPrice);
+                  const yHigh = props.y + props.height - ((high - minPrice) * yScale);
+                  const yLow = props.y + props.height - ((low - minPrice) * yScale);
+                  const yOpen = props.y + props.height - ((open - minPrice) * yScale);
+                  const yClose = props.y + props.height - ((close - minPrice) * yScale);
+                  
+                  const bodyTop = Math.min(yOpen, yClose);
+                  const bodyBottom = Math.max(yOpen, yClose);
+                  const bodyHeight = bodyBottom - bodyTop || 1;
+                  const bodyWidth = Math.max(props.width * 0.6, 4);
+                  
+                  const color = close >= open ? "hsl(var(--primary))" : "hsl(var(--destructive))";
                   
                   return (
-                    <rect
-                      x={x}
-                      y={y}
-                      width={width}
-                      height={height}
-                      fill={color}
-                      stroke={color}
-                    />
+                    <g>
+                      {/* High-Low line */}
+                      <line
+                        x1={x}
+                        y1={yHigh}
+                        x2={x}
+                        y2={yLow}
+                        stroke={color}
+                        strokeWidth={1}
+                      />
+                      {/* Open-Close body */}
+                      <rect
+                        x={x - bodyWidth / 2}
+                        y={bodyTop}
+                        width={bodyWidth}
+                        height={bodyHeight}
+                        fill={close >= open ? color : "transparent"}
+                        stroke={color}
+                        strokeWidth={1}
+                      />
+                    </g>
                   );
                 }}
               />
