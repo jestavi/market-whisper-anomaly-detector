@@ -148,7 +148,7 @@ export const PortfolioAnalysis = ({ portfolioStocks, stockSectors }: PortfolioAn
   return (
     <div className="space-y-6">
       {/* Portfolio Risk Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -246,7 +246,7 @@ export const PortfolioAnalysis = ({ portfolioStocks, stockSectors }: PortfolioAn
                   <Badge variant="outline">{sector.stocks.length} stocks</Badge>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
                   <div>
                     <div className="text-muted-foreground">Anomalies</div>
                     <div className="font-medium">{sector.totalAnomalies}</div>
@@ -275,9 +275,9 @@ export const PortfolioAnalysis = ({ portfolioStocks, stockSectors }: PortfolioAn
                 
                 <div className="mt-2">
                   <div className="text-xs text-muted-foreground mb-1">Stocks:</div>
-                  <div className="flex flex-wrap gap-1">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1">
                     {sector.stocks.map(stock => (
-                      <Badge key={stock} variant="outline" className="text-xs">
+                      <Badge key={stock} variant="outline" className="text-xs justify-center sm:justify-start">
                         {stock}
                       </Badge>
                     ))}

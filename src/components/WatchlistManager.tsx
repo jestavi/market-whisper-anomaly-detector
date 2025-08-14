@@ -81,17 +81,18 @@ export const WatchlistManager = ({ watchlist, onAddStock, onRemoveStock, stockSe
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="Enter stock symbol (e.g., AAPL)"
               value={newSymbol}
               onChange={(e) => setNewSymbol(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="uppercase"
+              className="uppercase flex-1"
             />
-            <Button onClick={handleAddStock} disabled={!newSymbol.trim()}>
+            <Button onClick={handleAddStock} disabled={!newSymbol.trim()} className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
-              Add Stock
+              <span className="hidden sm:inline">Add Stock</span>
+              <span className="sm:hidden">Add</span>
             </Button>
           </div>
         </CardContent>
@@ -115,14 +116,14 @@ export const WatchlistManager = ({ watchlist, onAddStock, onRemoveStock, stockSe
               {Object.entries(watchlistBySector).map(([sector, stocks]) => (
                 <div key={sector}>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">{sector}</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                     {stocks.map((stock) => (
-                      <Badge key={stock} variant="secondary" className="px-3 py-1">
-                        {stock}
+                      <Badge key={stock} variant="secondary" className="px-2 sm:px-3 py-1 text-xs sm:text-sm justify-between sm:justify-start">
+                        <span>{stock}</span>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-auto p-0 ml-2 hover:bg-transparent"
+                          className="h-auto p-0 ml-1 sm:ml-2 hover:bg-transparent"
                           onClick={() => onRemoveStock(stock)}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -165,14 +166,14 @@ export const WatchlistManager = ({ watchlist, onAddStock, onRemoveStock, stockSe
               {Object.entries(filteredPopularStocks).map(([sector, stocks]) => (
                 <div key={sector}>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">{sector}</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-wrap gap-2">
                     {stocks.map((stock) => (
                       <Button
                         key={stock}
                         variant="outline"
                         size="sm"
                         onClick={() => onAddStock(stock)}
-                        className="h-8"
+                        className="h-8 text-xs sm:text-sm"
                       >
                         <Plus className="h-3 w-3 mr-1" />
                         {stock}

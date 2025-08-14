@@ -133,19 +133,19 @@ const Portfolio = () => {
     : 0;
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-background p-3 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Portfolio Anomaly Monitor</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Portfolio Anomaly Monitor</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Monitor multiple stocks for anomalies and correlations across your portfolio
             </p>
           </div>
 
           {/* Portfolio Overview Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Stocks</CardTitle>
@@ -189,11 +189,11 @@ const Portfolio = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="grid" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="grid">Stock Grid</TabsTrigger>
-            <TabsTrigger value="watchlist">Manage Watchlist</TabsTrigger>
-            <TabsTrigger value="analysis">Portfolio Analysis</TabsTrigger>
-            <TabsTrigger value="market">Market Comparison</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+            <TabsTrigger value="grid" className="text-xs sm:text-sm">Grid</TabsTrigger>
+            <TabsTrigger value="watchlist" className="text-xs sm:text-sm">Watchlist</TabsTrigger>
+            <TabsTrigger value="analysis" className="text-xs sm:text-sm">Analysis</TabsTrigger>
+            <TabsTrigger value="market" className="text-xs sm:text-sm">Market</TabsTrigger>
           </TabsList>
 
           <TabsContent value="grid" className="space-y-4">

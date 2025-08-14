@@ -261,9 +261,9 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
 
   return (
     <Card className="w-full h-full">
-      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center p-4 border-b gap-3">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 sm:p-4 border-b gap-3">
         <div className="flex items-center">
-          <h3 className="font-semibold text-lg mr-2">Price History</h3>
+          <h3 className="font-semibold text-base sm:text-lg mr-2">Price History</h3>
           <TooltipProvider>
             <UITooltip>
               <TooltipTrigger asChild>
@@ -275,13 +275,13 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
             </UITooltip>
           </TooltipProvider>
         </div>
-        <div className="flex flex-wrap gap-2 w-full xs:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <div className="flex space-x-2">
             <Button
               variant={chartType === 'line' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setChartType('line')}
-              className="flex-1 xs:flex-auto"
+              className="flex-1 sm:flex-auto text-xs sm:text-sm"
             >
               Line
             </Button>
@@ -289,7 +289,7 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
               variant={chartType === 'candle' ? 'default' : 'outline'}
               size="sm"
               onClick={() => setChartType('candle')}
-              className="flex-1 xs:flex-auto"
+              className="flex-1 sm:flex-auto text-xs sm:text-sm"
             >
               Candle
             </Button>
@@ -298,13 +298,13 @@ export function StockChart({ stockData, anomalies, onAnomalyClick }: StockChartP
             variant={showVolumeChart ? 'default' : 'outline'}
             size="sm"
             onClick={() => setShowVolumeChart(!showVolumeChart)}
-            className="w-full xs:w-auto"
+            className="w-full sm:w-auto text-xs sm:text-sm"
           >
             {showVolumeChart ? 'Hide Volume' : 'Show Volume'}
           </Button>
         </div>
       </div>
-      <CardContent className="p-0 h-[500px]">
+      <CardContent className="p-0 h-[300px] sm:h-[400px] lg:h-[500px]">
         <div className="h-full flex flex-col">
           <div className={`${showVolumeChart ? 'h-2/3' : 'h-full'} w-full`}>
             {renderChart()}

@@ -203,10 +203,10 @@ export const StockGrid = ({
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
           <Select value={selectedSector} onValueChange={onSectorChange}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Select sector" />
             </SelectTrigger>
             <SelectContent>
@@ -218,7 +218,7 @@ export const StockGrid = ({
             </SelectContent>
           </Select>
           
-          <span className="text-sm text-muted-foreground">
+          <span className="text-xs sm:text-sm text-muted-foreground">
             {stocks.length} stock{stocks.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -228,14 +228,16 @@ export const StockGrid = ({
           disabled={loading}
           variant="outline"
           size="sm"
+          className="w-full sm:w-auto"
         >
           <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Data
+          <span className="hidden sm:inline">Refresh Data</span>
+          <span className="sm:hidden">Refresh</span>
         </Button>
       </div>
 
       {/* Stock Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         {loading ? (
           Array.from({ length: 8 }).map((_, i) => (
             <StockCardSkeleton key={i} />

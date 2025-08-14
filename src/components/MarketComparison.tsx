@@ -171,23 +171,25 @@ export const MarketComparison = ({ portfolioStocks, stockSectors }: MarketCompar
                 Compare portfolio performance against market indices
               </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
               <Select value={selectedIndex} onValueChange={setSelectedIndex}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <optgroup label="Market Indices">
                     {Object.entries(marketIndices).map(([symbol, name]) => (
                       <SelectItem key={symbol} value={symbol}>
-                        {symbol} - {name}
+                        <span className="hidden sm:inline">{symbol} - {name}</span>
+                        <span className="sm:hidden">{symbol}</span>
                       </SelectItem>
                     ))}
                   </optgroup>
                   <optgroup label="Sector ETFs">
                     {Object.entries(sectorETFs).map(([symbol, name]) => (
                       <SelectItem key={symbol} value={symbol}>
-                        {symbol} - {name}
+                        <span className="hidden sm:inline">{symbol} - {name}</span>
+                        <span className="sm:hidden">{symbol}</span>
                       </SelectItem>
                     ))}
                   </optgroup>
@@ -199,15 +201,17 @@ export const MarketComparison = ({ portfolioStocks, stockSectors }: MarketCompar
                 disabled={loading}
                 variant="outline"
                 size="sm"
+                className="w-full sm:w-auto"
               >
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
+                <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">Update</span>
               </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <LineChart data={performanceData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
@@ -282,7 +286,7 @@ export const MarketComparison = ({ portfolioStocks, stockSectors }: MarketCompar
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
                   <div>
                     <div className="text-muted-foreground">Beta</div>
                     <div className="font-medium">{metric.beta.toFixed(2)}</div>
@@ -327,11 +331,17 @@ export const MarketComparison = ({ portfolioStocks, stockSectors }: MarketCompar
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <BarChart data={sectorComparison}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="sector" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
+              <XAxis 
+                dataKey="sector" 
+                tick={{ fontSize: 10 }}
+                angle={-45}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />
               <Bar 
                 dataKey="outperformance" 
